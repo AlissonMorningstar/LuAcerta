@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#11131a"/>
+<meta name="description" content="LuAcerta+ — build V9 Ground Truth alinhada ao Supabase conectado."/>
+<meta name="color-scheme" content="light dark"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
+<title>LuAcerta+ · V9 Ground Truth</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f5f6f8;--surface:#fff;--surface2:#fafbfc;--text:#17191f;--muted:#707680;--line:#e7e9ee;--brand:#6f55e8;--brand2:#8a73ff;--ok:#159b60;--warn:#c98200;--danger:#d64c57;--dark:#11131a;--shadow:0 12px 34px rgba(17,19,26,.07);--radius:18px;--input:#fff}
+[data-theme=dark]{--bg:#0d0f13;--surface:#171a20;--surface2:#12151a;--text:#f2f4f7;--muted:#9ba1ad;--line:#292e37;--dark:#f2f4f7;--input:#101318;--shadow:0 12px 34px rgba(0,0,0,.24)}
+*{box-sizing:border-box}html,body,#app{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{border:0;cursor:pointer;color:inherit;background:none}input,select,textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--input);color:var(--text);outline:none}textarea{min-height:92px;resize:vertical}body{padding-bottom:env(safe-area-inset-bottom)}
+.shell{min-height:100vh;max-width:1280px;margin:auto}.top{height:72px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:30}.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:21px}.logo{width:36px;height:36px;border-radius:12px;background:var(--dark);color:var(--surface);display:grid;place-items:center;font-size:19px}.userbox{display:flex;align-items:center;gap:10px}.usertext{font-size:12px;color:var(--muted);text-align:right}.usertext b{display:block;color:var(--text);font-size:13px}.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--brand) 13%,var(--surface));color:var(--brand);font-weight:900}.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 72px)}.side{border-right:1px solid var(--line);background:var(--surface);padding:16px 12px;position:sticky;top:72px;height:calc(100vh - 72px);overflow:auto}.side button{width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:var(--muted);font-weight:800;text-align:left;margin-bottom:4px}.side button.active{background:color-mix(in srgb,var(--brand) 10%,var(--surface));color:var(--brand)}.side .sep{height:1px;background:var(--line);margin:12px 6px}.content{padding:24px 20px 104px}.screen{display:none}.screen.active{display:block}.eyebrow{font-size:12px;color:var(--muted);margin-bottom:5px}.title{font-size:30px;line-height:1.1;margin:0 0 20px;font-weight:900}.subtitle{color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.stat{padding:18px}.stat .k{font-size:12px;color:var(--muted)}.stat .v{font-size:27px;font-weight:900;margin-top:7px}.action{padding:17px;text-align:left;min-height:122px}.action .ico{font-size:24px;margin-bottom:14px}.action h3{margin:0 0 5px;font-size:16px}.action p{margin:0;color:var(--muted);font-size:12px;line-height:1.4}.primary{background:var(--dark);color:var(--surface)}.primary p{color:color-mix(in srgb,var(--surface) 68%,var(--dark))}.section{margin-top:28px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}.section h2{margin:0;font-size:18px}.link{color:var(--brand);font-weight:800;font-size:12px}.toolbar{display:flex;gap:8px;overflow:auto;padding-bottom:4px;margin-bottom:15px}.chip{white-space:nowrap;padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:12px;font-weight:800}.chip.active{background:var(--brand);border-color:var(--brand);color:#fff}.tables{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.table-card{padding:16px;min-height:132px;position:relative;text-align:left}.table-card .number{font-size:25px;font-weight:900}.state{font-size:10px;font-weight:900;text-transform:uppercase;margin-top:7px}.available .state{color:var(--ok)}.occupied .state{color:var(--warn)}.closed .state{color:var(--danger)}.table-card .sum{position:absolute;right:15px;bottom:14px;font-weight:900}.table-card .tag{position:absolute;right:14px;top:14px}.status{display:inline-flex;align-items:center;white-space:nowrap;padding:6px 9px;border-radius:999px;background:var(--line);color:var(--muted);font-size:10px;font-weight:900}.status.on{background:rgba(21,155,96,.12);color:var(--ok)}.status.warn{background:rgba(201,130,0,.12);color:var(--warn)}.status.off{background:rgba(214,76,87,.12);color:var(--danger)}.search{margin-bottom:14px}.product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.product-card{padding:15px;text-align:left}.product-card h3{margin:4px 0 5px;font-size:16px}.price{font-size:18px;font-weight:900}.small{font-size:11px;color:var(--muted)}.muted{color:var(--muted)}.btn{padding:11px 14px;border-radius:12px;font-weight:900}.btn-brand{background:var(--brand);color:#fff}.btn-dark{background:var(--dark);color:#fff}.btn-light{background:var(--surface2);border:1px solid var(--line)}.btn-danger{background:rgba(214,76,87,.11);color:var(--danger);border:1px solid rgba(214,76,87,.18)}.btn:disabled{opacity:.5;cursor:not-allowed}.row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.rows{overflow:hidden}.left{min-width:0}.right{display:flex;align-items:center;gap:8px}.panel{padding:17px}.quick-layout{display:grid;grid-template-columns:1.45fr .8fr;gap:14px}.cart-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 0;border-bottom:1px solid var(--line)}.cart-item:last-child{border-bottom:0}.qty{display:inline-flex;align-items:center;gap:7px;margin-left:9px}.qty button{width:28px;height:28px;border-radius:9px;background:var(--surface2);border:1px solid var(--line)}.total{display:flex;justify-content:space-between;font-size:22px;font-weight:900;padding-top:15px}.info{padding:13px 15px;border-radius:13px;background:color-mix(in srgb,var(--brand) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--brand) 19%,var(--line));line-height:1.45}.empty{padding:30px 16px;text-align:center;color:var(--muted)}.back{padding:5px 0;color:var(--muted);font-weight:900}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal-back{position:fixed;inset:0;background:rgba(10,11,15,.55);display:none;align-items:flex-end;justify-content:center;z-index:80}.modal-back.open{display:flex}.modal{width:min(620px,100%);max-height:92vh;overflow:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:21px;box-shadow:0 -10px 44px rgba(0,0,0,.18)}.modal h2{margin:0 0 7px;font-size:22px}.modal-actions{display:flex;gap:8px;margin-top:14px}.modal-actions>*{flex:1}.field{display:grid;gap:6px;margin:11px 0}.field label{font-size:12px;font-weight:900}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,18px);background:var(--dark);color:var(--surface);padding:11px 15px;border-radius:12px;opacity:0;pointer-events:none;transition:.18s;z-index:120;font-size:12px;font-weight:800;max-width:min(90vw,520px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.hidden{display:none!important}.kbd{padding:2px 5px;border:1px solid var(--line);border-radius:6px;font-size:10px;color:var(--muted)}.switch{width:44px;height:25px;border-radius:999px;background:var(--line);padding:3px;display:flex;align-items:center}.switch i{display:block;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18)}.switch.on{background:var(--ok);justify-content:flex-end}.danger-text{color:var(--danger)}.table-actions{position:absolute;right:12px;top:40px}.ticket{padding:14px;border:1px dashed var(--line);border-radius:12px}.order-card{padding:15px}.order-card h3{margin:0 0 3px}.order-items{margin:11px 0 0;padding-left:17px}.order-items li{margin:4px 0;font-size:13px}.kitchen-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.footer-note{font-size:11px;color:var(--muted);padding-top:14px}.login{min-height:100vh;display:grid;place-items:center;padding:22px}.login-card{width:min(460px,100%);padding:28px}.login-logo{display:flex;align-items:center;gap:11px;font-size:26px;font-weight:900;margin-bottom:26px}.login-logo .logo{width:44px;height:44px;border-radius:15px}.login-card h1{font-size:28px;margin:0 0 6px}.login-card p{color:var(--muted);margin:0 0 22px}.error{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(214,76,87,.11);color:var(--danger);font-size:12px;line-height:1.45}.hint{font-size:11px;color:var(--muted);line-height:1.5}.config{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}.config summary{cursor:pointer;font-size:12px;font-weight:900;color:var(--muted)}.mobile-nav{display:none}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.side{display:none}.mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:68px;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:70;justify-content:center}.mobile-nav button{flex:1;max-width:150px;color:var(--muted);font-size:10px;font-weight:900}.mobile-nav button span{display:block;font-size:20px;margin-bottom:2px}.mobile-nav button.active{color:var(--brand)}.stats{grid-template-columns:repeat(2,1fr)}.tables{grid-template-columns:repeat(3,1fr)}.kitchen-grid{grid-template-columns:1fr 1fr}.quick-layout{grid-template-columns:1fr}}
+@media(max-width:680px){.content{padding:19px 13px 88px}.top{padding:0 13px}.usertext{display:none}.title{font-size:27px}.grid,.stats,.detail-grid,.kitchen-grid{grid-template-columns:1fr}.tables{grid-template-columns:repeat(2,1fr)}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.action{min-height:115px}}
+</style>
+</head>
+<body>
+<div id="auth" class="login">
+  <div class="card login-card">
+    <div class="login-logo"><div class="logo">◔</div>LuAcerta+</div>
+    <h1>Entrar</h1>
+    <p>Operação de salão, comandas, cozinha e controle do estabelecimento.</p>
+    <form id="loginForm">
+      <div class="field"><label>E-mail</label><input id="email" type="email" autocomplete="username" required placeholder="voce@exemplo.com"></div>
+      <div class="field"><label>Senha</label><input id="password" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+      <button id="loginBtn" class="btn btn-brand" style="width:100%">Entrar</button>
+    </form>
+    <div id="loginError" class="error hidden"></div>
+    <div class="config">
+      <details>
+        <summary>Configuração da conexão</summary>
+        <div class="field"><label>URL do Supabase</label><input id="sbUrl" placeholder="https://seu-projeto.supabase.co"></div>
+        <div class="field"><label>Chave pública (anon / publishable)</label><input id="sbKey" placeholder="ey..." autocomplete="off"></div>
+        <button id="saveConfig" class="btn btn-light" style="width:100%">Salvar conexão</button>
+        <p class="hint">A chave precisa ser pública. Nunca coloque service_role no navegador.</p>
+      </details>
+    </div>
+  </div>
+</div>
+<div id="app" class="shell hidden">
+  <header class="top">
+    <div class="brand"><div class="logo">◔</div>LuAcerta+ <span class="kbd">V9 GT</span></div>
+    <div class="userbox"><div class="usertext"><b id="staffName">—</b><span id="staffMeta">—</span></div><div class="avatar" id="avatar">U</div></div>
+  </header>
+  <div class="layout">
+    <aside class="side">
+      <button data-nav="home" class="active">⌂ <span>Início</span></button>
+      <button data-nav="tables">▦ <span>Mesas</span></button>
+      <button data-nav="comandas">▤ <span>Comandas</span></button>
+      <button data-nav="quick">＋ <span>Venda rápida</span></button>
+      <button data-nav="kitchen">♨ <span>Cozinha</span></button>
+      <div class="sep"></div>
+      <button data-nav="admin">⚙ <span>Administração</span></button>
+      <button id="navEst" data-nav="establishments" class="hidden">◫ <span>Estabelecimentos</span></button>
+      <button data-nav="audit">◷ <span>Histórico</span></button>
+      <div class="sep"></div>
+      <button id="themeBtn">☾ <span>Tema</span></button>
+      <button id="reloadBtn">↻ <span>Atualizar</span></button>
+      <button id="logoutBtn">⇥ <span>Sair</span></button>
+    </aside>
+    <main class="content">
+      <section id="home" class="screen active">
+        <div class="eyebrow">Visão geral</div><h1 class="title">Painel operacional</h1>
+        <div id="homeStats" class="stats"></div>
+        <div class="section"><div class="section-head"><h2>Ações</h2><span class="small" id="homeDate"></span></div><div id="homeActions" class="grid"></div></div>
+        <div class="section"><div class="section-head"><h2>Movimentações recentes</h2><button class="link" data-nav="audit">Ver histórico</button></div><div id="homeRecent" class="card rows"></div></div>
+      </section>
+
+      <section id="tables" class="screen">
+        <div class="eyebrow">Salão</div><h1 class="title">Mesas</h1>
+        <div class="toolbar"><button class="chip active" data-table-filter="all">Todas</button><button class="chip" data-table-filter="available">Livres</button><button class="chip" data-table-filter="occupied">Ocupadas</button><button class="chip" data-table-filter="closed">Fechadas</button><button id="addTableBtn" class="chip hidden">＋ Mesa</button></div>
+        <div id="tablesGrid" class="tables"></div>
+      </section>
+
+      <section id="comandas" class="screen">
+        <div class="eyebrow">Atendimento</div><h1 class="title">Comandas</h1>
+        <div class="toolbar"><button class="chip active" data-comanda-filter="open">Abertas</button><button class="chip" data-comanda-filter="all">Todas</button><button id="newComandaBtn" class="chip">＋ Comanda</button></div>
+        <div id="comandasRows" class="card rows"></div>
+      </section>
+
+      <section id="quick" class="screen">
+        <div class="eyebrow" id="composerEyebrow">Balcão / quiosque</div><h1 class="title" id="composerTitle">Venda rápida</h1>
+        <div id="composerInfo" class="info hidden"></div>
+        <div class="quick-layout">
+          <div class="card panel"><input id="productSearch" class="search" placeholder="Buscar produto…"><div class="section-head"><h2>Produtos</h2><span class="small" id="productCount">—</span></div><div id="productGrid" class="product-grid"></div></div>
+          <div class="card panel"><div class="section-head"><h2>Pedido</h2><span class="small" id="cartHint"></span></div><div id="cart"></div><div class="total"><span>Total</span><span id="cartTotal">R$ 0,00</span></div><button id="composerAction" class="btn btn-brand" style="width:100%;margin-top:15px" disabled>Confirmar pagamento</button><button id="composerBack" class="btn btn-light" style="width:100%;margin-top:8px">Cancelar</button></div>
+        </div>
+      </section>
+
+      <section id="kitchen" class="screen"><div class="eyebrow">Produção</div><h1 class="title">Cozinha</h1><div class="tabs"><button type="button" class="chip active" data-kitchen-status="pending">Pendentes</button><button type="button" class="chip" data-kitchen-status="preparing">Preparando</button><button type="button" class="chip" data-kitchen-status="ready">Prontos</button></div><div id="kitchenStations" class="toolbar"></div><div id="kitchenGrid" class="kitchen-grid"></div></section>
+
+      <section id="admin" class="screen"><div class="eyebrow">Controle</div><h1 class="title">Administração</h1><div id="adminCards" class="grid"></div></section>
+
+      <section id="admin-detail" class="screen"><button class="back" data-nav="admin">← Administração</button><div id="adminDetail"></div></section>
+      <section id="table-detail" class="screen"><button class="back" data-nav="tables">← Mesas</button><div id="tableDetail"></div></section>
+      <section id="comanda-detail" class="screen"><button class="back" data-nav="comandas">← Comandas</button><div id="comandaDetail"></div></section>
+      <section id="audit" class="screen"><div class="eyebrow">Rastro operacional</div><h1 class="title">Histórico</h1><div id="auditRows" class="card rows"></div></section>
+      <section id="establishments" class="screen"><div class="eyebrow">SUPERADMIN</div><h1 class="title">Estabelecimentos</h1><div class="info">Seleção de estabelecimento está disponível para SUPERADMIN. A criação de um novo proprietário exige backend server-side de provisionamento e não é exposta nesta build.</div><div id="estRows" class="card rows"></div></section>
+    </main>
+  </div>
+  <nav class="mobile-nav"><button data-nav="home" class="active"><span>⌂</span>Início</button><button data-nav="tables"><span>▦</span>Mesas</button><button data-nav="comandas"><span>▤</span>Comandas</button><button data-nav="kitchen"><span>♨</span>Cozinha</button><button data-nav="admin"><span>⚙</span>Mais</button></nav>
+</div>
+
+<div id="genericModal" class="modal-back"><div class="modal"><h2 id="modalTitle">—</h2><div id="modalBody"></div><div class="modal-actions"><button id="modalCancel" class="btn btn-light">Cancelar</button><button id="modalOk" class="btn btn-brand">Confirmar</button></div></div></div>
+<div id="paymentModal" class="modal-back"><div class="modal"><h2 id="paymentTitle">Pagamento</h2><div id="paymentSummary" class="info"></div><div id="paymentStatus" class="small" style="min-height:24px;margin-top:9px"></div><div class="grid" style="grid-template-columns:1fr 1fr;margin-top:11px"><button class="card action" type="button" data-pay="pix"><div class="ico">⌁</div><h3>PIX</h3><p>Pagamento instantâneo.</p></button><button class="card action" type="button" data-pay="cash"><div class="ico">$</div><h3>Dinheiro</h3><p>Espécie.</p></button><button class="card action" type="button" data-pay="debit"><div class="ico">▣</div><h3>Débito</h3><p>Cartão.</p></button><button class="card action" type="button" data-pay="credit"><div class="ico">▣</div><h3>Crédito</h3><p>Cartão.</p></button></div><button id="paymentCancel" type="button" class="btn btn-light" style="width:100%;margin-top:10px">Cancelar</button></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+'use strict';
+const cfg={url:localStorage.getItem('luacerta-url')||'https://fopyvozrpvrbattqifsg.supabase.co',key:localStorage.getItem('luacerta-key')||'sb_publishable_N9_cEuXrGovPzaSaMK8RrA_Irx7yd-Q'};
+const state={session:null,ctx:null,establishment:null,staff:null,diagnostics:[],theme:localStorage.getItem('luacerta-theme')||'light',mode:'ambos',screen:'home',products:[],tables:[],comandas:[],orders:[],orderItems:[],stations:[],cart:[],composer:{type:'quick',tableId:null,comandaId:null},paymentTarget:null,kitchenStatus:'pending',kitchenStationId:'all',lastRefreshErrors:[]};
+let sb=null, unsubscribe=null;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const nowLabel=()=>new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date());
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2200)}
+function errText(e){return e?.message||e?.error_description||String(e||'Erro desconhecido')}
+function isAdmin(){return ['owner','admin','manager'].includes(String(state.ctx?.staff_role||state.staff?.role||'').toLowerCase())||!!state.ctx?.is_platform_admin}
+function canOperate(){return isSuper()?!!state.establishment:['owner','admin','manager','waiter'].includes(String(state.ctx?.staff_role||state.staff?.role||'').toLowerCase())}
+function canKitchen(){return isSuper()?!!state.establishment:['owner','admin','manager','kitchen'].includes(String(state.ctx?.staff_role||state.staff?.role||'').toLowerCase())}
+function openStatus(v){return ['open','active','opened'].includes(String(v||'').toLowerCase())}
+function isSuper(){return !!state.ctx?.is_platform_admin}
+function setTheme(){document.documentElement.dataset.theme=state.theme==='dark'?'dark':'light';$('#themeBtn').querySelector('span').textContent=state.theme==='dark'?'Claro':'Escuro';$('#themeBtn').firstChild.textContent=state.theme==='dark'?'☀ ':'☾ '}
+function showError(msg){const el=$('#loginError');el.textContent=msg;el.classList.remove('hidden')}
+function clearError(){$('#loginError').textContent='';$('#loginError').classList.add('hidden')}
+function initSb(){if(!cfg.url||!cfg.key||!window.supabase)return false;try{sb=window.supabase.createClient(cfg.url,cfg.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return true}catch(e){showError('Configuração inválida: '+errText(e));return false}}
+async function reportClientError(operation,error,details={}){
+  const msg=errText(error);
+  const row={time:new Date().toISOString(),operation,message:msg,details};
+  state.diagnostics.unshift(row); state.diagnostics=state.diagnostics.slice(0,100);
+  try{if(sb&&state.establishment){await sb.rpc('report_client_error',{p_establishment_id:state.establishment.id,p_operation:operation,p_message:msg,p_details:details})}}catch(_){}
+  console.error('[LuAcerta+]',operation,error,details);
+  return row;
+}
+async function rpc(name,args){try{const {data,error}=await sb.rpc(name,args);if(error){await reportClientError('rpc:'+name,error,{args});throw error}return data}catch(e){if(e?.code||e?.message)throw e;await reportClientError('rpc:'+name,e,{args});throw e}}
+async function tracked(label,fn){try{return await fn()}catch(e){await reportClientError(label,e);throw e}}
+async function loadContext(){
+  if(!sb||!state.session?.user)return;
+  state.mode='ambos';
+  try{const {data,error}=await sb.rpc('get_my_context');if(error)throw error;state.ctx=Array.isArray(data)?data[0]:data}catch(e){state.ctx=null}
+  if(state.ctx?.establishment_id){const {data}=await sb.from('establishments').select('*').eq('id',state.ctx.establishment_id).maybeSingle();state.establishment=data||null}
+  if(!state.establishment){const {data:staff,error}=await sb.from('staff').select('*').eq('id',state.session.user.id).maybeSingle();if(error)throw error;if(!staff)throw new Error('Usuário autenticado sem perfil em staff.');if(String(staff.status||'active')!=='active')throw new Error('Este funcionário está inativo.');state.staff=staff;const {data:est}=await sb.from('establishments').select('*').eq('id',staff.establishment_id).maybeSingle();if(!est)throw new Error('Estabelecimento não encontrado.');state.establishment=est;state.ctx={user_id:state.session.user.id,is_platform_admin:false,staff_role:staff.role,staff_name:staff.name,establishment_id:est.id,establishment_name:est.name}}
+  if(state.ctx?.is_platform_admin&&!state.establishment){state.establishment=null}
+  if(state.establishment&&state.ctx?.establishment_id){const {data:staff}=await sb.from('staff').select('*').eq('id',state.session.user.id).maybeSingle();state.staff=staff||state.staff}
+  if(state.establishment){const {data:sett}=await sb.from('establishment_settings').select('*').eq('establishment_id',state.establishment.id).maybeSingle();if(sett?.operation_mode)state.mode=sett.operation_mode}
+}
+async function boot(){
+  setTheme();
+  $('#sbUrl').value=cfg.url;$('#sbKey').value=cfg.key;
+  if(!initSb())return;
+  if(await resolvePublicCredential())return;
+  const {data:{session},error}=await sb.auth.getSession();if(error)throw error;
+  if(session){state.session=session;await loadContext();enterApp()}else showLogin();
+  if(unsubscribe)unsubscribe();
+  unsubscribe=sb.auth.onAuthStateChange(async(_evt,s)=>{if(s){state.session=s;try{await loadContext();enterApp()}catch(e){await sb.auth.signOut();showError(errText(e));showLogin()}}else{state.session=null;showLogin()}}).data.subscription;
+}
+function showLogin(){$('#auth').classList.remove('hidden');$('#app').classList.add('hidden');}
+async function enterApp(){$('#auth').classList.add('hidden');$('#app').classList.remove('hidden');$('#navEst').classList.toggle('hidden',!isSuper());$$('[data-nav=admin]').forEach(b=>b.classList.toggle('hidden',!isAdmin()));$('#staffName').textContent=state.ctx?.staff_name||state.staff?.name||'SUPERADMIN';$('#staffMeta').textContent=[state.ctx?.staff_role||state.staff?.role||'superadmin',state.ctx?.establishment_name||state.establishment?.name||'Global'].filter(Boolean).join(' · ');$('#avatar').textContent=($('#staffName').textContent||'U').trim().charAt(0).toUpperCase();await refreshAll();applyModeUI();go(state.screen||'home')}
+function go(screen){if(screen==='admin'||screen==='admin-detail'){if(!isAdmin()){toast('Sem permissão para administração.');return}}if(screen==='audit'){if(!isAdmin()){toast('Sem permissão para histórico.');return}}if(screen==='establishments'){if(!isSuper()){toast('Sem permissão.');return}}if(screen==='quick'&&!canOperate()){toast('Sem permissão para venda.');return}state.screen=screen;$$('.screen').forEach(s=>s.classList.toggle('active',s.id===screen));$$('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===screen));window.scrollTo({top:0,behavior:'smooth'});if(screen==='home')renderHome();if(screen==='tables')renderTables();if(screen==='comandas')renderComandas();if(screen==='kitchen')renderKitchen();if(screen==='admin')renderAdmin();if(screen==='audit')renderAudit();if(screen==='establishments')loadEstablishments()}
+async function refreshAll(){
+  if(!sb)return;
+  if(!state.establishment&&isSuper()){renderHome();return}
+  const jobs=[['produtos',loadProducts],['setores',loadStations],['mesas',loadTables],['comandas',loadComandas],['pedidos',loadOrders],['auditoria',loadAudit]];
+  const results=await Promise.allSettled(jobs.map(([name,fn])=>tracked('refresh:'+name,fn)));
+  const failures=results.map((x,i)=>x.status==='rejected'?{area:jobs[i][0],message:errText(x.reason)}:null).filter(Boolean);
+  state.lastRefreshErrors=failures;
+  if(failures.length){
+    failures.forEach(f=>reportClientError('refresh:'+f.area,f.message,{area:f.area}));
+    toast(`Atualização parcial: ${failures.length} falha(s).`);
+  }
+  state.products.forEach(p=>p.station=state.stations.find(s=>String(s.id)===String(p.station_id))?.name||'');
+  renderHome();renderTables();renderComandas();renderKitchen();
+}
+async function loadProducts(){if(!state.establishment)return;const {data,error}=await sb.from('products').select('*').eq('establishment_id',state.establishment.id).order('name');if(error)throw error;state.products=(data||[]).map(p=>({raw:p,id:p.id,name:p.name,category:p.category||'Produtos',price:Number(p.price||0),active:p.active!==false,station_id:p.station_id||null,station:''}));}
+async function loadStations(){if(!state.establishment){state.stations=[];return}const {data,error}=await sb.from('kitchen_stations').select('*').eq('establishment_id',state.establishment.id).order('name');if(error)throw error;state.stations=data||[];}
+async function loadTables(){if(!state.establishment)return;const {data,error}=await sb.from('tables').select('*').eq('establishment_id',state.establishment.id);if(error)throw error;state.tables=(data||[]).map(t=>{const id=String(t.id);const number=t.table_number??t.number??t.name??id.slice(0,6);return {...t,_id:id,_number:String(number),_status:String(t.status||'available').toLowerCase()}});}
+async function loadComandas(){if(!state.establishment)return;const {data,error}=await sb.from('comandas').select('*').eq('establishment_id',state.establishment.id);if(error)throw error;state.comandas=(data||[]).map(c=>({...c,_id:String(c.id),_number:String(c.comanda_number??c.number??c.name??c.id.slice(0,6)),_status:String(c.status||'open').toLowerCase()}));}
+async function loadOrders(){if(!state.establishment)return;const pageSize=500;let all=[];for(let offset=0;;offset+=pageSize){const {data,error}=await sb.from('orders').select('*').eq('establishment_id',state.establishment.id).order('created_at',{ascending:false}).range(offset,offset+pageSize-1);if(error)throw error;const page=data||[];all.push(...page);if(page.length<pageSize)break;if(offset>=9500)break;}state.orders=all;if(state.orders.length){const ids=state.orders.map(o=>o.id);const {data:items,error:itemError}=await sb.from('order_items').select('*').in('order_id',ids);if(itemError)throw itemError;state.orderItems=items||[]}else state.orderItems=[];} 
+async function loadAudit(){if(!state.establishment)return;const {data,error}=await sb.rpc('get_audit_events',{p_establishment_id:state.establishment.id,p_limit:100});if(error)throw error;state._audit=data||[];}
+function tableStatus(t){return t._status==='occupied'||t._status==='busy'?'occupied':t._status==='closed'?'closed':'available'}
+function tableTotal(t){const c=state.comandas.find(x=>String(x.table_id||'')===String(t._id)&&['open','active','opened'].includes(x._status));if(!c)return 0;const orders=state.orders.filter(o=>String(o.comanda_id||'')===String(c.id)&&o.payment_status!=='cancelled');return orders.reduce((s,o)=>s+state.orderItems.filter(i=>i.order_id===o.id).reduce((a,i)=>a+Number(i.total??Number(i.quantity)*Number(i.unit_price),0),0),0)}
+function renderHome(){
+  const today=new Date();today.setHours(0,0,0,0);const todays=state.orders.filter(o=>new Date(o.created_at)>=today);const paid=todays.filter(o=>o.payment_status==='paid');const revenue=paid.reduce((s,o)=>s+state.orderItems.filter(i=>i.order_id===o.id).reduce((a,i)=>a+Number(i.total??Number(i.quantity)*Number(i.unit_price),0),0),0);const openTables=state.tables.filter(t=>tableStatus(t)==='occupied').length;const activeOrders=state.orders.filter(o=>['pending','preparing','ready'].includes(String(o.status))).length;const avail=state.products.filter(p=>p.active).length;
+  $('#homeDate').textContent=today.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
+  $('#homeStats').innerHTML=[['Faturado hoje',brl(revenue)],['Mesas ocupadas',openTables],['Pedidos em produção',activeOrders],['Produtos disponíveis',avail]].map(x=>`<div class="card stat"><div class="k">${esc(x[0])}</div><div class="v">${esc(x[1])}</div></div>`).join('');
+  const quick=`<button class="card action primary" data-home-action="quick"><div class="ico">＋</div><h3>Venda rápida</h3><p>Balcão, quiosque ou compra sem mesa.</p></button>`;const table=`<button class="card action" data-home-action="tables"><div class="ico">▦</div><h3>Abrir mesa</h3><p>Selecionar mesa e lançar pedido.</p></button>`;const kitchen=`<button class="card action" data-home-action="kitchen"><div class="ico">♨</div><h3>Cozinha</h3><p>Acompanhar pendentes e preparo.</p></button>`;const admin=isAdmin()?`<button class="card action" data-home-action="admin"><div class="ico">⚙</div><h3>Administração</h3><p>Produtos, equipe e operação.</p></button>`:'';$('#homeActions').innerHTML=quick+table+kitchen+admin;$$('[data-home-action]').forEach(b=>b.onclick=()=>go(b.dataset.homeAction));
+  const rec=state.orders.slice(0,7).map(o=>{const items=state.orderItems.filter(i=>i.order_id===o.id);const total=items.reduce((s,i)=>s+Number(i.total??Number(i.quantity)*Number(i.unit_price),0),0);return `<div class="row"><div class="left"><b>${o.order_type==='quick_sale'?'Venda rápida':'Pedido'}</b><div class="small">${esc(o.status||'—')} · ${new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div></div><div class="right"><span class="status ${o.payment_status==='paid'?'on':o.payment_status==='cancelled'?'off':'warn'}">${esc(o.payment_status||'unpaid')}</span><b>${brl(total)}</b></div></div>`}).join('');$('#homeRecent').innerHTML=rec||'<div class="empty">Sem movimentações ainda.</div>';
+}
+function applyModeUI(){const onlyTables=state.mode==='mesas',onlyComandas=state.mode==='comandas',ops=canOperate();$('#addTableBtn').classList.toggle('hidden',!isAdmin()||onlyComandas);$('#newComandaBtn').classList.toggle('hidden',!ops||onlyTables);}
+function renderTables(filter='all'){const g=$('#tablesGrid');let arr=state.tables;arr=arr.filter(t=>filter==='all'||tableStatus(t)===filter);g.innerHTML=arr.map(t=>`<button class="card table-card ${tableStatus(t)}" data-table-id="${esc(t._id)}"><span class="number">Mesa ${esc(t._number)}</span><div class="state">${tableStatus(t)==='available'?'Livre':tableStatus(t)==='occupied'?'Ocupada':'Fechada'}</div>${tableTotal(t)?`<div class="sum">${brl(tableTotal(t))}</div>`:''}</button>`).join('')||'<div class="empty">Nenhuma mesa encontrada.</div>';$$('[data-table-id]').forEach(b=>b.onclick=()=>openTable(b.dataset.tableId))}
+function renderComandas(filter='open'){let arr=state.comandas;if(filter==='open')arr=arr.filter(c=>['open','active','opened'].includes(c._status));$('#comandasRows').innerHTML=arr.map(c=>{const orders=state.orders.filter(o=>String(o.comanda_id||'')===String(c.id)&&o.payment_status!=='cancelled');const total=orders.reduce((s,o)=>s+state.orderItems.filter(i=>i.order_id===o.id).reduce((a,i)=>a+Number(i.total??Number(i.quantity)*Number(i.unit_price),0),0),0);const t=state.tables.find(x=>String(x._id)===String(c.table_id||''));return `<button class="row" style="width:100%;text-align:left" data-comanda-id="${esc(c._id)}"><div class="left"><b>#${esc(c._number)}</b><div class="small">${t?`Mesa ${esc(t._number)}`:'Sem mesa'} · ${esc(c._status)}</div></div><div class="right"><span class="status ${['open','active','opened'].includes(c._status)?'on':'off'}">${esc(c._status)}</span><b>${brl(total)}</b></div></button>`}).join('')||'<div class="empty">Nenhuma comanda encontrada.</div>';$$('[data-comanda-id]').forEach(b=>b.onclick=()=>openComanda(b.dataset.comandaId))}
+function renderProducts(search=''){const q=search.toLowerCase();const arr=state.products.filter(p=>p.active&&p.name.toLowerCase().includes(q));$('#productCount').textContent=`${arr.length} disponíveis`;$('#productGrid').innerHTML=arr.map(p=>`<button class="card product-card" data-product-id="${esc(p.id)}"><div class="small">${esc(p.category)}${p.station?` · ${esc(p.station)}`:''}</div><h3>${esc(p.name)}</h3><div class="price">${brl(p.price)}</div></button>`).join('')||'<div class="empty">Nenhum produto disponível.</div>';$$('[data-product-id]').forEach(b=>b.onclick=()=>addCart(b.dataset.productId))}
+function cartTotal(){return state.cart.reduce((s,i)=>s+Number(i.qty)*Number(i.unit_price),0)}
+function renderCart(){const e=$('#cart');if(!state.cart.length){e.innerHTML='<div class="empty">Nenhum item.</div>'}else e.innerHTML=state.cart.map(i=>`<div class="cart-item"><div class="left"><b>${esc(i.name)}</b><div class="small">${brl(i.unit_price)} cada <span class="qty"><button data-minus="${esc(i.id)}">−</button><b>${i.qty}</b><button data-plus="${esc(i.id)}">＋</button></span></div></div><b>${brl(i.qty*i.unit_price)}</b></div>`).join('');$$('[data-minus]').forEach(b=>b.onclick=()=>changeQty(b.dataset.minus,-1));$$('[data-plus]').forEach(b=>b.onclick=()=>changeQty(b.dataset.plus,1));$('#cartTotal').textContent=brl(cartTotal());$('#composerAction').disabled=!state.cart.length}
+function addCart(id){const p=state.products.find(x=>x.id===id);if(!p||!p.active)return toast('Produto indisponível');const i=state.cart.find(x=>x.id===id);if(i)i.qty++;else state.cart.push({id,qty:1,name:p.name,unit_price:p.price});renderCart();toast(p.name+' adicionado')}
+function changeQty(id,d){const i=state.cart.find(x=>x.id===id);if(!i)return;i.qty+=d;if(i.qty<=0)state.cart=state.cart.filter(x=>x.id!==id);renderCart()}
+function openComposer(type='quick',tableId=null,comandaId=null){if(type==='table'&&state.mode==='comandas')return toast('Este estabelecimento está no modo Comandas.');if(type==='comanda'&&state.mode==='mesas')return toast('Este estabelecimento está no modo Mesas.');state.composer={type,tableId,comandaId};state.cart=[];$('#productSearch').value='';$('#composerAction').textContent=type==='quick'?'Confirmar pagamento':'Enviar pedido';$('#composerBack').textContent='Cancelar';let eyebrow='Balcão / quiosque',title='Venda rápida',info='';if(type==='table'){const t=state.tables.find(x=>x._id===tableId);eyebrow=`Mesa ${t?esc(t._number):'—'}`;title=t?'Novo pedido':'Pedido';info=t?`Comanda da mesa: ${esc(activeComandaForTable(t._id)?._number||'será aberta ao enviar')}`:''}if(type==='comanda'){const c=state.comandas.find(x=>x._id===comandaId);eyebrow=`Comanda #${c?esc(c._number):'—'}`;title='Novo pedido';info=c?(c.table_id?`Vinculada à mesa ${esc(state.tables.find(t=>String(t._id)===String(c.table_id))?._number||'—')}`:'Comanda independente'):''}$('#composerEyebrow').innerHTML=eyebrow;$('#composerTitle').textContent=title;$('#composerInfo').innerHTML=info;$('#composerInfo').classList.toggle('hidden',!info);renderProducts();renderCart();go('quick')}
+function activeComandaForTable(tableId){return state.comandas.find(c=>String(c.table_id||'')===String(tableId)&&['open','active','opened'].includes(c._status))}
+async function ensureTableComanda(t){
+  let c=activeComandaForTable(t._id);
+  if(c)return c;
+  const id=await rpc('open_comanda',{p_establishment_id:state.establishment.id,p_table_id:t._id,p_comanda_number:null});
+  await refreshAll();
+  c=state.comandas.find(x=>String(x.id)===String(id))||activeComandaForTable(t._id);
+  if(!c)throw new Error('Comanda criada, mas não encontrada após atualização.');
+  return c;
+}
+async function sendComposer(){
+  if(!state.cart.length)return;
+  if(!canOperate())return toast('Sem permissão para lançar pedidos.');
+  try{
+    if(state.composer.type==='quick'){await quickSalePrompt();return}
+    let c;
+    if(state.composer.type==='table'){
+      const t=state.tables.find(x=>x._id===state.composer.tableId);
+      if(!t)throw new Error('Mesa não encontrada.');
+      c=await ensureTableComanda(t);
+    }else c=state.comandas.find(x=>x._id===state.composer.comandaId);
+    if(!c)throw new Error('Comanda não encontrada.');
+    if(!openStatus(c._status))throw new Error('Comanda encerrada.');
+    const orderId=await rpc('create_comanda_order',{p_establishment_id:state.establishment.id,p_comanda_id:c.id,p_items:state.cart.map(i=>({product_id:i.id,quantity:i.qty}))});
+    toast('Pedido enviado para produção');
+    state.cart=[];
+    await refreshAll();
+    openComanda(c.id);
+    return orderId;
+  }catch(e){toast('Erro: '+errText(e))}
+}
+async function quickSalePrompt(){
+  if(!canOperate())return toast('Sem permissão para venda rápida.');
+  if(!state.cart.length)return;
+  state.paymentTarget={kind:'quick'};
+  const total=cartTotal();
+  $('#paymentTitle').textContent='Pagamento';
+  $('#paymentSummary').innerHTML=`<b>Total</b><div style="font-size:27px;font-weight:900;margin-top:4px">${brl(total)}</div><div class="small" style="margin-top:6px">${state.cart.length} produto(s)</div>`;
+  $('#paymentStatus').textContent='Escolha a forma de pagamento.';
+  $('#paymentCancel').disabled=false;
+  $$('[data-pay]').forEach(b=>{b.disabled=false;b.style.opacity='1'});
+  $('#paymentModal').classList.add('open');
+}
+async function completeQuickSale(method){
+  const saleTotal=cartTotal();
+  if(!state.cart.length)return;
+  const buttons=$$('[data-pay]');
+  buttons.forEach(b=>{b.disabled=true;b.style.opacity='.55'});
+  $('#paymentCancel').disabled=true;
+  $('#paymentStatus').textContent='Registrando pagamento…';
+  try{
+    const id=await rpc('create_quick_sale',{p_establishment_id:state.establishment.id,p_items:state.cart.map(i=>({product_id:i.id,quantity:i.qty})),p_payment_method:method});
+    state.cart=[];renderCart();await refreshAll();
+    $('#paymentStatus').textContent='Pagamento confirmado ✓';
+    setTimeout(()=>$('#paymentModal').classList.remove('open'),260);
+    toast(`Venda paga · ${brl(saleTotal)}`);
+    return id;
+  }catch(e){
+    $('#paymentStatus').textContent='Não foi possível registrar: '+errText(e);
+    buttons.forEach(b=>{b.disabled=false;b.style.opacity='1'});
+    $('#paymentCancel').disabled=false;
+  }
+}
+function openTable(id){
+  const t=state.tables.find(x=>x._id===id);if(!t)return;
+  const c=activeComandaForTable(id);
+  const orders=c?state.orders.filter(o=>String(o.comanda_id||'')===String(c.id)&&o.payment_status!=='cancelled'):[];
+  const total=orders.reduce((s,o)=>s+state.orderItems.filter(i=>i.order_id===o.id).reduce((a,i)=>a+Number(i.total??Number(i.quantity)*Number(i.unit_price),0),0),0);
+  const canOrder=canOperate()&&tableStatus(t)!=='closed';
+  $('#tableDetail').innerHTML=`<div class="eyebrow">Mesa ${esc(t._number)}</div><h1 class="title">${tableStatus(t)==='occupied'?'Atendimento aberto':'Mesa livre'}</h1><div class="detail-grid"><div class="card panel"><div class="small">Status</div><h2>${tableStatus(t)==='occupied'?'Ocupada':'Livre'}</h2><div class="small">${c?`Comanda #${esc(c._number)}`:'Sem comanda aberta'}</div></div><div class="card panel"><div class="small">Total atual</div><h2>${brl(total)}</h2><div class="small">${orders.length} pedido(s)</div></div></div><div class="grid" style="margin-top:14px">${canOrder?`<button class="card action primary" data-tact="order"><div class="ico">＋</div><h3>Adicionar pedido</h3><p>Selecionar itens e enviar para preparo.</p></button>`:''}<button class="card action" data-tact="comanda"><div class="ico">▤</div><h3>Ver comanda</h3><p>Pedidos, total e fechamento.</p></button><button class="card action" data-tact="nfc"><div class="ico">⌁</div><h3>NFC / QR</h3><p>Credencial física da mesa.</p></button>${c&&openStatus(c._status)?`<button class="card action" data-tact="close"><div class="ico">✓</div><h3>Fechar comanda</h3><p>Registrar pagamento e liberar mesa.</p></button>`:''}</div>`;
+  $$('[data-tact]').forEach(b=>b.onclick=async()=>{if(b.dataset.tact==='order')openComposer('table',id,null);else if(b.dataset.tact==='comanda'){if(c)openComanda(c.id);else toast('A mesa ainda não possui comanda aberta.');}else if(b.dataset.tact==='nfc'){if(!isAdmin())return toast('Sem permissão para credenciais.');renderAdminDetail('credentials');}else if(b.dataset.tact==='close'){openCheckout(c.id)}});
+  go('table-detail');
+}
+function openComanda(id){
+  const c=state.comandas.find(x=>x._id===id);if(!c)return;
+  const orders=state.orders.filter(o=>String(o.comanda_id||'')===String(id));
+  const total=orders.filter(o=>o.payment_status!=='cancelled').reduce((s,o)=>s+state.orderItems.filter(i=>i.order_id===o.id).reduce((a,i)=>a+Number(i.total??Number(i.quantity)*Number(i.unit_price),0),0),0);
+  const t=state.tables.find(x=>String(x._id)===String(c.table_id||''));
+  const isOpen=openStatus(c._status);
+  $('#comandaDetail').innerHTML=`<div class="eyebrow">Comanda #${esc(c._number)}</div><h1 class="title">${esc(c._status)}</h1><div class="detail-grid"><div class="card panel"><div class="small">Vínculo</div><h2>${t?`Mesa ${esc(t._number)}`:'Sem mesa'}</h2><div class="small">${orders.length} pedido(s)</div></div><div class="card panel"><div class="small">Total</div><h2>${brl(total)}</h2><div class="small">${isOpen?'Pagamento em aberto':'Comanda encerrada'}</div></div></div><div class="section"><div class="section-head"><h2>Pedidos</h2>${isOpen&&canOperate()?'<button class="btn btn-brand" data-cact="add">＋ Pedido</button>':''}</div><div class="card rows">${orders.map(o=>{const items=state.orderItems.filter(i=>i.order_id===o.id);return `<div class="row"><div class="left"><b>${esc(o.status||'pending')}</b><div class="small">${new Date(o.created_at).toLocaleString('pt-BR')}</div><div class="small">${items.map(i=>`${i.quantity}× ${esc(state.products.find(p=>p.id===i.product_id)?.name||'Produto')}`).join(' · ')}</div></div><div class="right"><span class="status ${o.payment_status==='paid'?'on':o.payment_status==='cancelled'?'off':'warn'}">${esc(o.payment_status||'unpaid')}</span><b>${brl(items.reduce((s,i)=>s+Number(i.total??Number(i.quantity)*Number(i.unit_price),0),0))}</b></div></div>`}).join('')||'<div class="empty">Nenhum pedido.</div>'}</div></div>${isOpen&&canOperate()?`<div class="section"><button class="btn btn-brand" style="width:100%" data-cact="checkout">Fechar e receber ${brl(total)}</button></div>`:''}`;
+  $$('[data-cact]').forEach(b=>b.onclick=()=>b.dataset.cact==='add'?openComposer('comanda',null,id):openCheckout(id));
+  go('comanda-detail');
+}
+async function openCheckout(comandaId){
+  const c=state.comandas.find(x=>x._id===comandaId);if(!c||!openStatus(c._status))return toast('Comanda encerrada ou inexistente.');
+  state.paymentTarget={kind:'comanda',comandaId};
+  const orders=state.orders.filter(o=>String(o.comanda_id||'')===String(comandaId)&&o.payment_status!=='cancelled'&&o.payment_status!=='paid');
+  const total=orders.reduce((s,o)=>s+state.orderItems.filter(i=>i.order_id===o.id).reduce((a,i)=>a+Number(i.total??Number(i.quantity)*Number(i.unit_price),0),0),0);
+  $('#paymentTitle').textContent='Fechar comanda';
+  $('#paymentSummary').innerHTML=`<b>Comanda #${esc(c._number)}</b><div style="font-size:27px;font-weight:900;margin-top:4px">${brl(total)}</div>`;
+  $('#paymentStatus').textContent=orders.length?'Escolha a forma de pagamento.':'Comanda vazia: o fechamento liberará a mesa.';
+  $('#paymentCancel').disabled=false;
+  $$('[data-pay]').forEach(b=>{b.disabled=false;b.style.opacity='1'});
+  $('#paymentModal').classList.add('open');
+}
+async function completeCheckout(method){
+  const target=state.paymentTarget;if(!target)return;
+  const c=state.comandas.find(x=>x._id===target.comandaId);if(!c)return;
+  $$('[data-pay]').forEach(b=>b.disabled=true);$('#paymentCancel').disabled=true;$('#paymentStatus').textContent='Fechando comanda…';
+  try{
+    const closedTotal=await rpc('checkout_comanda',{p_comanda_id:c.id,p_payment_method:method});
+    await refreshAll();
+    $('#paymentStatus').textContent='Comanda encerrada ✓';
+    setTimeout(()=>$('#paymentModal').classList.remove('open'),260);
+    toast(closedTotal>0?`Comanda fechada · ${brl(closedTotal)}`:'Comanda vazia fechada');
+    if(c.table_id)openTable(c.table_id);else openComanda(c.id);
+  }catch(e){
+    $('#paymentStatus').textContent='Erro: '+errText(e);
+    $$('[data-pay]').forEach(b=>b.disabled=false);$('#paymentCancel').disabled=false;
+  }
+}
+function renderKitchen(){
+  const rolesOk=canKitchen();
+  const stations=[{id:'all',name:'Todos'},...state.stations.filter(s=>s.active!==false)];
+  $('#kitchenStations').innerHTML=stations.map(s=>`<button type="button" class="chip ${String(state.kitchenStationId)===String(s.id)?'active':''}" data-kitchen-station="${esc(s.id)}">${esc(s.name)}</button>`).join('');
+  const arr=rolesOk?state.orders.filter(o=>String(o.status||'pending')===state.kitchenStatus):[];
+  const filtered=arr.map(o=>{const items=state.orderItems.filter(i=>i.order_id===o.id);const shown=state.kitchenStationId==='all'?items:items.filter(i=>String(i.station_id||'')===String(state.kitchenStationId));return {o,items:shown}}).filter(x=>state.kitchenStationId==='all'||x.items.length);
+  $('#kitchenGrid').innerHTML=filtered.map(({o,items})=>{const names=items.map(i=>`${i.quantity}× ${esc(state.products.find(p=>p.id===i.product_id)?.name||'Produto')}`);const c=state.comandas.find(x=>String(x.id)===String(o.comanda_id||''));const t=state.tables.find(x=>String(x.id)===String(o.table_id||c?.table_id||''));const next=state.kitchenStatus==='pending'?'preparing':state.kitchenStatus==='preparing'?'ready':'delivered';return `<div class="card order-card"><div class="section-head"><div><div class="small">${o.order_type==='quick_sale'?'Venda rápida':c?`Comanda #${esc(c._number)}`:'Pedido'}</div><h3>${t?`Mesa ${esc(t._number)}`:'Balcão'}</h3></div><span class="status ${state.kitchenStatus==='ready'?'on':'warn'}">${esc(state.kitchenStatus)}</span></div><div class="small">${new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div><ul class="order-items">${names.map(n=>`<li>${n}</li>`).join('')}</ul>${rolesOk?`<button type="button" class="btn btn-brand" style="width:100%;margin-top:9px" data-next-order="${esc(o.id)}" data-next="${next}">${next==='preparing'?'Iniciar preparo':next==='ready'?'Marcar pronto':'Concluir pedido'}</button>`:''}</div>`}).join('')||'<div class="empty">Nenhum pedido nesta fila.</div>';
+  $$('[data-next-order]').forEach(b=>b.onclick=async()=>{try{await rpc('set_order_status',{p_order_id:b.dataset.nextOrder,p_status:b.dataset.next});await refreshAll();renderKitchen()}catch(e){toast('Erro: '+errText(e))}});
+  $$('[data-kitchen-station]').forEach(b=>b.onclick=()=>{state.kitchenStationId=b.dataset.kitchenStation;renderKitchen()});
+}
+function renderAdmin(){const cards=[['products','▤','Produtos','Preço, disponibilidade e setor.'],['team','♙','Equipe','Perfis, funções e status.'],['stations','♨','Setores','Cozinha, bar e produção.'],['mode','▦','Modo de operação','Mesas, comandas ou ambos.'],['credentials','⌁','NFC & QR','Credenciais físicas e tokens.'],['settings','⚙','Configurações','Nome do estabelecimento e opções.'],['audit','◷','Auditoria','Rastro de ações operacionais.']];$('#adminCards').innerHTML=cards.map(c=>`<button class="card action" data-admin-key="${c[0]}"><div class="ico">${c[1]}</div><h3>${c[2]}</h3><p>${c[3]}</p></button>`).join('');$$('[data-admin-key]').forEach(b=>b.onclick=()=>renderAdminDetail(b.dataset.adminKey));}
+async function renderAdminDetail(key){let html='';if(key==='products')html=await adminProducts();else if(key==='team')html=await adminTeam();else if(key==='stations')html=await adminStations();else if(key==='mode')html=await adminMode();else if(key==='credentials')html=await adminCredentials();else if(key==='settings')html=await adminSettings();else if(key==='audit')html=await adminAudit();$('#adminDetail').innerHTML=html;bindAdmin(key);go('admin-detail')}
+async function adminProducts(){return `<div class="eyebrow">Cardápio</div><h1 class="title">Produtos</h1><div class="toolbar"><button class="chip" id="newProduct">＋ Produto</button></div><div class="card rows">${state.products.map(p=>`<div class="row"><div class="left"><b>${esc(p.name)}</b><div class="small">${esc(p.category)} · ${p.station?esc(p.station)+' · ':''}${brl(p.price)}</div></div><div class="right"><span class="status ${p.active?'on':'off'}">${p.active?'Disponível':'Pausado'}</span><button class="switch ${p.active?'on':''}" data-prod-toggle="${esc(p.id)}"><i></i></button><button class="btn btn-light" data-prod-edit="${esc(p.id)}">Editar</button></div></div>`).join('')||'<div class="empty">Nenhum produto.</div>'}</div>`}
+async function adminTeam(){if(!state.establishment)return '<div class="empty">Selecione um estabelecimento.</div>';const {data,error}=await sb.from('staff').select('*').eq('establishment_id',state.establishment.id).order('name');if(error)return `<div class="empty">${esc(errText(error))}</div>`;return `<div class="eyebrow">Acesso</div><h1 class="title">Equipe</h1><div class="info">Esta build está alinhada ao backend conectado: edição de perfis usa RPC seguro. Criação de contas Auth exige uma função server-side específica e, por isso, não é exibida como recurso falso.</div><div class="card rows">${(data||[]).map(s=>`<div class="row"><div class="left"><b>${esc(s.name||'Sem nome')}</b><div class="small">${esc(s.role||'waiter')} · ${esc(s.status||'active')}</div></div><div class="right"><span class="status ${s.status==='active'?'on':'off'}">${esc(s.status||'active')}</span><button class="btn btn-light" data-staff-edit="${esc(s.id)}">Editar</button></div></div>`).join('')||'<div class="empty">Sem funcionários.</div>'}</div>`}
+async function adminStations(){if(!state.establishment)return '';let data=[];try{const r=await sb.from('kitchen_stations').select('*').eq('establishment_id',state.establishment.id).order('name');if(!r.error)data=r.data||[]}catch(e){}return `<div class="eyebrow">Produção</div><h1 class="title">Setores</h1><div class="toolbar"><button class="chip" id="newStation">＋ Setor</button></div><div class="card rows">${data.map(s=>`<div class="row"><div class="left"><b>${esc(s.name)}</b><div class="small">${s.active===false?'Inativo':'Ativo'}</div></div><div class="right"><span class="status ${s.active===false?'off':'on'}">${s.active===false?'Inativo':'Ativo'}</span></div></div>`).join('')||'<div class="empty">Nenhum setor cadastrado. Use o botão para criar.</div>'}</div>`}
+async function adminMode(){return `<div class="eyebrow">Operação</div><h1 class="title">Modo de operação</h1><div class="info">A configuração fica no estabelecimento. Venda rápida permanece disponível em qualquer modo.</div><div class="card rows" style="margin-top:12px">${[['mesas','Mesas','Mesa → comanda'],['comandas','Comandas','Comanda independente'],['ambos','Mesas + comandas','Operação híbrida']].map(x=>`<div class="row"><div class="left"><b>${x[1]}</b><div class="small">${x[2]}</div></div><button class="btn ${state.mode===x[0]?'btn-brand':'btn-light'}" data-set-mode="${x[0]}">${state.mode===x[0]?'Ativo':'Selecionar'}</button></div>`).join('')}<div class="row"><div class="left"><b>Venda rápida</b><div class="small">Balcão / quiosque sem mesa.</div></div><span class="status on">Sempre ativa</span></div></div>`}
+async function adminCredentials(){if(!state.establishment)return '<div class="empty">Selecione um estabelecimento.</div>';const {data,error}=await sb.from('physical_credentials').select('*').eq('establishment_id',state.establishment.id).order('created_at',{ascending:false});if(error)return `<div class="empty">${esc(errText(error))}</div>`;return `<div class="eyebrow">Credenciais físicas</div><h1 class="title">NFC & QR</h1><div class="info"><b>Fluxo NFC:</b> a credencial aponta para uma URL pública do LuAcerta+. Ao tocar a tag, o celular abre o estabelecimento e entra <b>direto na mesa ou comanda vinculada</b>. Se a credencial for de mesa, o sistema procura automaticamente a comanda aberta daquela mesa.</div><div class="toolbar" style="margin-top:12px"><button class="chip" id="newCredential">＋ Credencial</button></div><div class="card rows">${(data||[]).map(c=>`<div class="row"><div class="left"><b>${esc(c.label||c.token)}</b><div class="small">${esc(c.kind)} · ${c.active===false?'revogada':'ativa'}</div></div><div class="right"><span class="status ${c.active===false?'off':'on'}">${c.active===false?'Revogada':'Ativa'}</span>${c.active!==false&&['nfc','nfc_qr'].includes(c.kind)?`<button class="btn btn-brand" data-cred-write="${esc(c.id)}">Gravar NFC</button>`:''}<button class="btn btn-light" data-cred-view="${esc(c.id)}">Ver token</button><button class="btn btn-danger" data-cred-off="${esc(c.id)}">Revogar</button></div></div>`).join('')||'<div class="empty">Nenhuma credencial cadastrada.</div>'}</div>`}
+async function adminSettings(){return `<div class="eyebrow">Estabelecimento</div><h1 class="title">Configurações</h1><div class="card panel"><div class="field"><label>Nome do estabelecimento</label><input id="estName" value="${esc(state.establishment?.name||'')}"></div><button class="btn btn-brand" id="saveEstName">Salvar nome</button><div class="footer-note">O nome pode ser alterado por owner/admin e fica salvo no banco.</div></div>`}
+async function adminAudit(){let rows=state._audit||[];return `<div class="eyebrow">Controle</div><h1 class="title">Auditoria</h1><div class="card rows">${rows.map(a=>`<div class="row"><div class="left"><b>${esc(a.action||a.event_type||'Ação')}</b><div class="small">${new Date(a.created_at||a.timestamp||Date.now()).toLocaleString('pt-BR')} · ${esc(a.staff_id||'sistema')}</div></div></div>`).join('')||'<div class="empty">Sem eventos registrados.</div>'}</div>`}
+function bindAdmin(key){
+  $$('#adminDetail [data-prod-toggle]').forEach(b=>b.onclick=async()=>{const p=state.products.find(x=>x.id===b.dataset.prodToggle);if(!p)return;try{await rpc('set_product_active',{p_product_id:p.id,p_active:!p.active});await refreshAll();renderAdminDetail('products')}catch(e){toast('Erro: '+errText(e))}});
+  $$('#adminDetail [data-prod-edit]').forEach(b=>b.onclick=()=>editProduct(b.dataset.prodEdit));
+  $('#newProduct')?.addEventListener('click',()=>editProduct(null));
+  $$('#adminDetail [data-set-mode]').forEach(b=>b.onclick=async()=>{try{await rpc('set_operation_mode',{p_establishment_id:state.establishment.id,p_operation_mode:b.dataset.setMode});state.mode=b.dataset.setMode;applyModeUI();toast('Modo salvo');renderAdminDetail('mode')}catch(e){toast('Erro: '+errText(e))}});
+  $('#newStation')?.addEventListener('click',()=>promptText('Novo setor','Nome do setor',async name=>{await rpc('create_kitchen_station',{p_establishment_id:state.establishment.id,p_name:name});await refreshAll();renderAdminDetail('stations')}));
+  $('#newCredential')?.addEventListener('click',()=>newCredential());
+  $$('#adminDetail [data-cred-view]').forEach(b=>b.onclick=async()=>{const r=await sb.from('physical_credentials').select('*').eq('id',b.dataset.credView).maybeSingle();if(r.data){const url=`${location.origin}${location.pathname}?token=${encodeURIComponent(r.data.token||'')}`;openText('Token da credencial',`${r.data.token||'Sem token'}\n\nURL pública\n${url}`)}});
+  $$('#adminDetail [data-cred-write]').forEach(b=>b.onclick=()=>writeCredentialNfc(b.dataset.credWrite));
+  $$('#adminDetail [data-cred-off]').forEach(b=>b.onclick=async()=>{try{await rpc('revoke_physical_credential',{p_credential_id:b.dataset.credOff});toast('Credencial revogada');renderAdminDetail('credentials')}catch(e){toast('Erro: '+errText(e))}});
+  $('#saveEstName')?.addEventListener('click',async()=>{const name=$('#estName').value.trim();if(!name)return toast('Informe um nome');try{await rpc('update_establishment_name',{p_establishment_id:state.establishment.id,p_name:name});state.establishment.name=name;state.ctx={...(state.ctx||{}),establishment_name:name};}catch(e){return toast('Erro: '+errText(e))}$('#staffMeta').textContent=[state.ctx?.staff_role||state.staff?.role||'owner',name].join(' · ');toast('Nome salvo')});
+  $$('#adminDetail [data-staff-edit]').forEach(b=>b.onclick=()=>editStaff(b.dataset.staffEdit));
+}
+function showModal(title,body,onOk,okLabel='Confirmar'){const m=$('#genericModal'),ok=$('#modalOk'),cancel=$('#modalCancel');$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;ok.textContent=okLabel;ok.disabled=false;cancel.disabled=false;cancel.onclick=()=>{if(cancel.disabled)return;m.classList.remove('open')};ok.onclick=async()=>{ok.disabled=true;cancel.disabled=true;try{await onOk();m.classList.remove('open')}catch(e){toast('Erro: '+errText(e));ok.disabled=false;cancel.disabled=false}};m.classList.add('open')}
+function promptText(title,label,onOk){showModal(title,`<div class="field"><label>${esc(label)}</label><input id="promptValue" autofocus></div>`,async()=>{const v=$('#promptValue').value.trim();if(!v)throw new Error('Informe um valor.');await onOk(v)})}
+function openText(title,text){showModal(title,`<div class="info" style="word-break:break-all">${esc(text)}</div>`,async()=>{},'Fechar');$('#modalOk').onclick=()=>$('#genericModal').classList.remove('open')}
+function editProduct(id){const p=state.products.find(x=>x.id===id);showModal(id?'Editar produto':'Novo produto',`<div class="field"><label>Nome</label><input id="pName" value="${esc(p?.name||'')}"></div><div class="field"><label>Categoria</label><input id="pCat" value="${esc(p?.category||'')}"></div><div class="field"><label>Setor de produção</label><select id="pStation"><option value="">Sem setor</option>${state.stations.map(s=>`<option value="${esc(s.id)}" ${String(p?.station_id||'')===String(s.id)?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div><div class="field"><label>Preço</label><input id="pPrice" inputmode="decimal" min="0" value="${p?.price??''}"></div><div class="field"><label>Ativo</label><select id="pActive"><option value="true" ${p?.active!==false?'selected':''}>Disponível</option><option value="false" ${p?.active===false?'selected':''}>Pausado</option></select></div>`,async()=>{const name=$('#pName').value.trim(),category=$('#pCat').value.trim(),station_id=$('#pStation').value||null,price=Number(String($('#pPrice').value).replace(',','.')),active=$('#pActive').value==='true';if(!name||!Number.isFinite(price)||price<0)throw new Error('Nome e preço válido (>= 0) são obrigatórios.');await rpc('upsert_product',{p_product_id:id||null,p_establishment_id:state.establishment.id,p_name:name,p_category:category,p_price:price,p_active:active,p_station_id:station_id});await refreshAll();renderAdminDetail('products')},id?'Salvar':'Criar')}
+async function editStaff(id){
+  if(!isAdmin())return toast('Sem permissão');
+  const {data,error}=await sb.from('staff').select('*').eq('id',id).maybeSingle();
+  if(error) return toast('Erro: '+errText(error));
+  if(!data) return toast('Funcionário não encontrado');
+  const actor=String(state.ctx?.staff_role||state.staff?.role||'').toLowerCase();
+  showModal('Editar funcionário',`<div class=\"info\">${esc(data.name||'Funcionário')}</div><div class=\"field\"><label>Função</label><select id=\"editRole\">${staffRoleOptions(actor,String(data.role||'waiter').toLowerCase())}</select></div><div class=\"field\"><label>Status</label><select id=\"editStatus\"><option value=\"active\" ${String(data.status||'active')==='active'?'selected':''}>Ativo</option><option value=\"inactive\" ${String(data.status||'active')==='inactive'?'selected':''}>Inativo</option></select></div>`,async()=>{
+    await rpc('update_staff_profile',{p_staff_id:data.id,p_role:$('#editRole').value,p_status:$('#editStatus').value});
+    toast('Funcionário atualizado');
+    await refreshAll();
+    await renderAdminDetail('team');
+  },'Salvar');
+}
+function staffRoleOptions(actor,current=null){const ranks={owner:50,admin:40,manager:30,waiter:20,kitchen:20};const ar=ranks[String(actor||'').toLowerCase()]||0;const roles=[['waiter','Garçom'],['kitchen','Cozinha'],['manager','Gerente'],['admin','Admin'],['owner','Owner']];return roles.filter(([r])=>isSuper()?true:((ranks[r]||0)<ar||r===current)).map(([r,l])=>`<option value="${r}" ${r===current?'selected':''}>${l}</option>`).join('')}
+async function newCredential(){
+  showModal('Nova credencial',`<div class="field"><label>Tipo</label><select id="cKind"><option value="qr">QR</option><option value="nfc">NFC</option><option value="nfc_qr">NFC + QR</option></select></div><div class="field"><label>Rótulo</label><input id="cLabel" placeholder="Comanda #0849 / Mesa 04"></div><div class="field"><label>Vínculo</label><select id="cLink"><option value="table">Mesa</option><option value="comanda">Comanda</option></select></div><div class="field" id="cLinkTable"><label>Mesa</label><select id="cTable">${state.tables.map(t=>`<option value="${esc(t._id)}">Mesa ${esc(t._number)}</option>`).join('')}</select></div><div class="field hidden" id="cLinkComanda"><label>Comanda</label><select id="cComanda">${state.comandas.map(c=>`<option value="${esc(c._id)}">#${esc(c._number)}</option>`).join('')}</select></div>`,async()=>{const kind=$('#cKind').value,link=$('#cLink').value,tableId=link==='table'?$('#cTable').value:null,comandaId=link==='comanda'?$('#cComanda').value:null;if(!tableId&&!comandaId)throw new Error('Selecione um vínculo.');const data=await rpc('create_physical_credential',{p_establishment_id:state.establishment.id,p_kind:kind,p_label:$('#cLabel').value.trim(),p_table_id:tableId,p_comanda_id:comandaId});toast('Credencial criada');await renderAdminDetail('credentials');openText('Token da credencial',data?.token||'Token criado no servidor.')},'Cadastrar');
+  $('#cLink').onchange=()=>{$('#cLinkTable').classList.toggle('hidden',$('#cLink').value!=='table');$('#cLinkComanda').classList.toggle('hidden',$('#cLink').value!=='comanda')};
+}
+async function loadEstablishments(){if(!isSuper())return;const {data,error}=await sb.from('establishments').select('*').order('created_at',{ascending:false});$('#estRows').innerHTML=error?`<div class="empty">${esc(errText(error))}</div>`:(data||[]).map(e=>`<button class="row" style="width:100%;text-align:left" data-est-id="${esc(e.id)}"><div class="left"><b>${esc(e.name||'Sem nome')}</b><div class="small">${esc(e.id)}</div></div><span class="status">Abrir</span></button>`).join('')||'<div class="empty">Nenhum estabelecimento.</div>';$$('[data-est-id]').forEach(b=>b.onclick=async()=>{state.establishment=(data||[]).find(e=>String(e.id)===String(b.dataset.estId));if(!state.establishment)return;state.ctx={...(state.ctx||{}),establishment_id:state.establishment.id,establishment_name:state.establishment.name,is_platform_admin:true};state.mode='ambos';try{const {data:sett,error}=await sb.from('establishment_settings').select('*').eq('establishment_id',state.establishment.id).maybeSingle();if(error)throw error;if(sett?.operation_mode)state.mode=sett.operation_mode;await refreshAll();applyModeUI();go('home');toast('Contexto selecionado')}catch(e){toast('Erro ao carregar estabelecimento: '+errText(e))}})}
+async function renderAudit(){if(!isAdmin())return; if(!state.establishment){$('#auditRows').innerHTML='<div class="empty">Selecione um estabelecimento.</div>';return}await loadAudit();$('#auditRows').innerHTML=(state._audit||[]).map(a=>`<div class="row"><div class="left"><b>${esc(a.action||a.event_type||'Ação')}</b><div class="small">${new Date(a.created_at||Date.now()).toLocaleString('pt-BR')} · ${esc(a.actor_kind||'staff')} · ${esc(a.staff_id||a.actor_user_id||'sistema')}</div></div></div>`).join('')||'<div class="empty">Sem eventos.</div>'}
+async function resolvePublicCredential(){const token=new URLSearchParams(location.search).get('token');if(!token)return false;try{const {data,error}=await sb.rpc('resolve_physical_credential',{p_token:token});if(error)throw error;if(!data)throw new Error('Credencial não encontrada ou revogada.');renderGuestAccount(data,token);$('#auth').classList.remove('hidden');return true}catch(e){showError(errText(e));return false}}
+function renderGuestAccount(data,token){
+  const isTable=!!data.table_id;
+  const title=isTable?(data.table_number?`Mesa ${esc(data.table_number)}`:'Mesa'):(data.comanda_number?`Comanda #${esc(data.comanda_number)}`:'Atendimento');
+  const items=Array.isArray(data.items)?data.items:[];
+  const total=Number(data.total||0);
+  const statusLabel=data.comanda_status==='open'?'Aberta':data.comanda_status==='closed'?'Fechada':'Sem comanda aberta';
+  const itemRows=items.length?items.map(i=>`<div class="row"><div class="left"><b>${esc(i.product_name||'Produto')}</b><div class="small">${esc(String(i.quantity))} × R$ ${Number(i.unit_price||0).toFixed(2).replace('.',',')} · ${esc(i.status||'pending')}</div></div><b>R$ ${Number(i.total||0).toFixed(2).replace('.',',')}</b></div>`).join(''):'<div class="empty">Nenhum item lançado ainda.</div>';
+  $('#auth').innerHTML=`<div class="login"><div class="card login-card" style="width:min(620px,100%)"><div class="login-logo"><div class="logo">☾</div>LuAcerta+</div><div class="eyebrow">${esc(data.establishment_name||'Estabelecimento')}</div><h1>${title}</h1><p>${esc(data.label||'Acesso físico')} · ${esc(statusLabel)}</p>${data.responsible_name?`<div class="info" style="margin-bottom:12px"><b>Responsável:</b> ${esc(data.responsible_name)}</div>`:''}<div class="card rows">${itemRows}</div><div class="total"><span>Total</span><span>R$ ${total.toFixed(2).replace('.',',')}</span></div>${!data.comanda_id?`<div class="hint" style="margin-top:15px">Esta mesa ainda não possui uma comanda aberta. Quando a equipe abrir a conta, este mesmo NFC passará a mostrar a conta automaticamente.</div>`:''}<div class="modal-actions"><button class="btn btn-light" id="guestRefresh">↻ Atualizar conta</button><button class="btn btn-dark" id="guestClose">Fechar</button></div><div class="hint" style="margin-top:12px">O NFC identifica a mesa/comanda por um token aleatório; o número interno não fica gravado como credencial.</div></div></div>`;
+  $('#guestRefresh').onclick=async()=>{try{const r=await sb.rpc('resolve_physical_credential',{p_token:token});if(r.error)throw r.error;if(!r.data)throw new Error('Credencial não encontrada.');renderGuestAccount(r.data,token);toast('Conta atualizada')}catch(e){showError(errText(e))}};
+  $('#guestClose').onclick=()=>{history.replaceState({},'',location.pathname);showLogin()};
+}
+async function writeCredentialNfc(id){
+  try{
+    if(!('NDEFReader' in window))throw new Error('Este navegador/dispositivo não oferece Web NFC. Abra o LuAcerta+ em HTTPS em um Android compatível.');
+    const {data,error}=await sb.from('physical_credentials').select('*').eq('id',id).maybeSingle();
+    if(error)throw error;if(!data||data.active===false)throw new Error('Credencial inexistente ou revogada.');
+    const url=`${location.origin}${location.pathname}?token=${encodeURIComponent(data.token||'')}`;
+    const ndef=new NDEFReader();
+    await ndef.write({records:[{recordType:'url',data:url}]});
+    toast('NFC gravado. Ao tocar a tag, ela abrirá direto na mesa/comanda.');
+  }catch(e){toast('NFC: '+errText(e));await reportClientError('write_nfc',e,{credential_id:id})}
+}
+$('#loginForm').onsubmit=async e=>{e.preventDefault();clearError();if(!sb&&!initSb()){showError('Salve a conexão do Supabase primeiro.');return}$('#loginBtn').disabled=true;$('#loginBtn').textContent='Entrando…';try{const {data,error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});if(error)throw error;state.session=data.session;await loadContext();enterApp()}catch(x){showError(errText(x))}finally{$('#loginBtn').disabled=false;$('#loginBtn').textContent='Entrar'}};
+$('#saveConfig').onclick=()=>{const u=$('#sbUrl').value.trim().replace(/\/$/,''),k=$('#sbKey').value.trim();if(!/^https:\/\/[^\s]+$/.test(u)||!k)return showError('Informe URL e chave pública.');localStorage.setItem('luacerta-url',u);localStorage.setItem('luacerta-key',k);cfg.url=u;cfg.key=k;clearError();initSb();toast('Conexão salva')};
+$('#logoutBtn').onclick=async()=>{if(sb)await sb.auth.signOut();};$('#reloadBtn').onclick=async()=>{toast('Atualizando…');await refreshAll();go(state.screen)};$('#themeBtn').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';localStorage.setItem('luacerta-theme',state.theme);setTheme()};
+$$('[data-nav]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.nav)));
+$$('[data-table-filter]').forEach(b=>b.onclick=()=>{$$('[data-table-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderTables(b.dataset.tableFilter)});
+$$('[data-comanda-filter]').forEach(b=>b.onclick=()=>{$$('[data-comanda-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderComandas(b.dataset.comandaFilter)});
+$$('[data-kitchen-status]').forEach(b=>b.onclick=()=>{state.kitchenStatus=b.dataset.kitchenStatus;$$('[data-kitchen-status]').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderKitchen()});
+$('#productSearch').addEventListener('input',e=>renderProducts(e.target.value));$('#composerAction').onclick=sendComposer;$('#composerBack').onclick=()=>{state.cart=[];go(state.composer.type==='quick'?'home':state.composer.type==='table'?'table-detail':'comanda-detail')};
+$('#paymentCancel').onclick=()=>{if($('#paymentCancel').disabled)return;state.paymentTarget=null;$('#paymentModal').classList.remove('open')};$$('[data-pay]').forEach(b=>b.onclick=()=>{if(state.paymentTarget?.kind==='comanda')completeCheckout(b.dataset.pay);else completeQuickSale(b.dataset.pay)});
+$('#addTableBtn').onclick=()=>showModal('Nova mesa',`<div class="field"><label>Número</label><input id="tableNumber" inputmode="numeric" placeholder="Ex.: 07"></div>`,async()=>{const n=$('#tableNumber').value.trim();if(!n)throw new Error('Informe o número.');try{await rpc('create_table',{p_establishment_id:state.establishment.id,p_table_number:n});await refreshAll();renderTables();toast('Mesa criada')}catch(e){await reportClientError('create_table',e,{table_number:n,establishment_id:state.establishment?.id});throw e}});
+$('#newComandaBtn').onclick=()=>showModal('Nova comanda',`<div class="field"><label>Número visível</label><input id="comNumber" inputmode="numeric" placeholder="Ex.: 0849"></div><div class="field"><label>Mesa (opcional)</label><select id="comTable"><option value="">Sem mesa</option>${state.tables.map(t=>`<option value="${esc(t._id)}">Mesa ${esc(t._number)}</option>`).join('')}</select></div>`,async()=>{const num=$('#comNumber').value.trim()||null,tid=$('#comTable').value||null;const id=await rpc('open_comanda',{p_establishment_id:state.establishment.id,p_table_id:tid,p_comanda_number:num});await refreshAll();openComanda(String(id))});
+setTheme();
+window.luacertaDiagnostics=()=>({lastRefreshErrors:state.lastRefreshErrors,diagnostics:state.diagnostics});
+boot().catch(async e=>{await reportClientError('boot',e);showError(errText(e))});
+})();
+</script>
+</body>
+</html>
